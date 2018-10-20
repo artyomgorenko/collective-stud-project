@@ -1,3 +1,6 @@
 package models
 
-class Index
+class Index{
+    var field: String = ""
+    var props: String = ""
+}
