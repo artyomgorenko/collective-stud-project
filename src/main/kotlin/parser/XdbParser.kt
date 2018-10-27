@@ -20,7 +20,7 @@ class XdbParser {
         }
     }
 
-    private fun readXml(filepath: String): Document {
+    fun readXml(filepath: String): Document {
         val xmlFile = File(filepath)
 
         val dbFactory = DocumentBuilderFactory.newInstance()
@@ -31,33 +31,33 @@ class XdbParser {
         return doc
     }
 
-    private fun parseSchema(xmlDoc: Document): Schema? {
+    fun parseSchema(xmlDoc: Document): Schema? {
         try {
-            val schemaName: String = xmlDoc.documentElement.getAttribute("name")
-            val fullTestEngine: String = xmlDoc.documentElement.getAttribute("fulltext_engine")
-            val schemaVersion: String = xmlDoc.documentElement.getAttribute("version")
-            val schemaDescription: String = xmlDoc.documentElement.getAttribute("description")
-            val schema: Schema = Schema(schemaName, fullTestEngine, schemaVersion, schemaDescription)
+            val schema: Schema = Schema()
+            val attributes: NamedNodeMap = xmlDoc.documentElement.attributes
+
+            attributes.getNamedItem("name")?.let { schema.name = it.nodeValue }
+            attributes.getNamedItem("fulltest_engine")?.let { schema.fulltest_engine = it.nodeValue }
+            attributes.getNamedItem("version")?.let { schema.version = it.nodeValue }
+            attributes.getNamedItem("description")?.let { schema.description = it.nodeValue }
 
             // add domains to schema
-            val domainsList: ArrayList<Domain> ?= arrayListOf()
+            val domainsList: ArrayList<Domain> = arrayListOf()
             val domains: NodeList = xmlDoc.getElementsByTagName("domain")
             for (i in 0 until domains.length) {
                 val domainNode: Node? = domains.item(i)
                 if (domainNode != null) {
-                    domainsList?.plus(parseDomain(domainNode))
+                    domainsList.add(parseDomain(domainNode))
                 }
             }
             schema.domains = domainsList
 
             // add tables to schema
-            val tablesList: ArrayList<Table> ?= arrayListOf()
+            val tablesList: ArrayList<Table> = arrayListOf()
             val tables: NodeList = xmlDoc.getElementsByTagName("table")
             for (i in 0 until tables.length) {
-                val tableNode : Node? = tables.item(i)
-                if (tableNode != null) {
-                    parseTable(tableNode)?.let { tablesList?.add(it) }
-                }
+                val tableNode : Node = tables.item(i)
+                parseTable(tableNode).let { tablesList.add(it!!) }
             }
             schema.tables = tablesList
 
@@ -72,28 +72,37 @@ class XdbParser {
     private fun parseTable(tableNode: Node): Table? {
         try {
             val table: Table = Table()
-            val namedNodeMap: NamedNodeMap = tableNode.attributes
+            val attributes: NamedNodeMap = tableNode.attributes
 
-            table.name = namedNodeMap.getNamedItem("name").nodeValue
-            table.description = namedNodeMap.getNamedItem("description").nodeValue
-            table.ht_table_flags = false // TODO: need to get actual value
-            table.accessLevel = Integer.parseInt(namedNodeMap.getNamedItem("accessLevel").nodeValue)
-            table.properties = namedNodeMap.getNamedItem("properties").nodeValue.split(",")
+            attributes.getNamedItem("name")?.let { table.name = it.nodeValue }
+            attributes.getNamedItem("description")?.let { table.description = it.nodeValue }
+            attributes.getNamedItem("ht_table_flags")?.let { table.ht_table_flags = false }
+            attributes.getNamedItem("accessLevel")?.let { table.accessLevel = Integer.parseInt(it.nodeValue) }
+            attributes.getNamedItem("properties")?.let { table.properties = it.nodeValue.split(",") }
+
+            // add child tags
+            val fields: ArrayList<Field> = ArrayList()
+            val constraints: ArrayList<Constraint> = ArrayList()
+            val indexes: ArrayList<Index> = ArrayList()
 
             for (i in 0 until tableNode.childNodes.length) {
                 val node: Node = tableNode.childNodes.item(i)
                 when {
                     node.nodeName.equals("field") -> {
-                        table.fields?.add(parseField(node))
+                        fields.add(parseField(node))
                     }
                     node.nodeName.equals("constraint") -> {
-                        table.constraints?.add(parseConstarint(node))
+                        constraints.add(parseConstraint(node))
                     }
                     node.nodeName.equals("index") -> {
-                        table.indexes?.add(parseIndex(node))
+                        indexes.add(parseIndex(node))
                     }
                 }
             }
+
+            table.fields = fields
+            table.constraints = constraints
+            table.indexes = indexes
 
             return table
         } catch (ex: DOMException) {
@@ -105,11 +114,20 @@ class XdbParser {
 
     private fun parseDomain(node: Node): Domain {
         val domain: Domain = Domain()
+        val attributes: NamedNodeMap = node.attributes
+
+        attributes.getNamedItem("name")?.let  { domain.name = it.nodeValue }
+        attributes.getNamedItem("description")?.let  { domain.description = it.nodeValue }
+        attributes.getNamedItem("type")?.let { domain.type = it.nodeValue }
+        attributes.getNamedItem("align")?.let { domain.align = it.nodeValue }
+        attributes.getNamedItem("width")?.let { domain.width = Integer.parseInt(it.nodeValue) }
+        attributes.getNamedItem("charLength")?.let { domain.charLength = Integer.parseInt(it.nodeValue)}
+        attributes.getNamedItem("properties")?.let { domain.properties = it.nodeValue.split(",") }
 
         return domain
     }
 
-    private fun parseConstarint(node: Node): Constraint {
+    private fun parseConstraint(node: Node): Constraint {
         val constraint: Constraint = Constraint()
 
         return constraint
