@@ -129,18 +129,34 @@ class XdbParser {
 
     private fun parseConstraint(node: Node): Constraint {
         val constraint: Constraint = Constraint()
+        val attributes: NamedNodeMap = node.attributes
+
+        attributes.getNamedItem("kind")?.let{ Constraint.kind = it.nodeValue }
+        attributes.getNamedItem("items")?.let{ Constraint.items = it.nodeValue }
+        attributes.getNamedItem("reference")?.let{ Constraint.reference = it.nodeValue }
+        attributes.getNamedItem("props")?.let{ Constraint.props = it.nodeValue.split(",") }
 
         return constraint
     }
 
     private fun parseField(node: Node): Field {
         val field: Field = Field()
+        val attributes: NamedNodeMap = node.attributes
+
+        attributes.getNamedItem("name")?.let{ Field.name = it.nodeValue }
+        attributes.getNamedItem("rname")?.let{ Field.rname = it.nodeValue }
+        attributes.getNamedItem("domain")?.let{ Field.domain = it.nodeValue }
+        attributes.getNamedItem("props")?.let{ Field.props = it.nodeValue.split(",") }
 
         return field
     }
 
     private fun parseIndex(node: Node): Index {
         val index: Index = Index()
+        val attributes: NamedNodeMap = node.attributes
+
+        attributes.getNamedItem("field")?.let{ Index.field = it.nodeValue }
+        attributes.getNamedItem("props")?.let{ Index.props = it.nodeValue.split(",") }
 
         return index
     }
