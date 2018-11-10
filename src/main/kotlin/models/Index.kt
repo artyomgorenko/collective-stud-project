@@ -1,6 +1,4 @@
 package models
 
-class Index{
-    var field: String = ""
-    var props: String = ""
-}
+data class Index(var field: String = "",
+                 var properties: List<String> = emptyList())
