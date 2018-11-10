@@ -134,7 +134,7 @@ class XdbParser {
         attributes.getNamedItem("kind")?.let{ constraint.kind = it.nodeValue }
         attributes.getNamedItem("items")?.let{ constraint.items = it.nodeValue }
         attributes.getNamedItem("reference")?.let{ constraint.reference = it.nodeValue }
-        attributes.getNamedItem("props")?.let{ constraint.props = it.nodeValue.split(",") }
+        attributes.getNamedItem("properties")?.let{ constraint.properties = it.nodeValue.split(",") }
 
         return constraint
     }
@@ -146,7 +146,7 @@ class XdbParser {
         attributes.getNamedItem("name")?.let{ field.name = it.nodeValue }
         attributes.getNamedItem("rname")?.let{ field.rname = it.nodeValue }
         attributes.getNamedItem("domain")?.let{ field.domain = it.nodeValue }
-        attributes.getNamedItem("props")?.let{ field.props = it.nodeValue.split(",") }
+        attributes.getNamedItem("properties")?.let{ field.properties = it.nodeValue.split(",") }
 
         return field
     }
@@ -156,7 +156,7 @@ class XdbParser {
         val attributes: NamedNodeMap = node.attributes
 
         attributes.getNamedItem("field")?.let{ index.field = it.nodeValue }
-        attributes.getNamedItem("props")?.let{ index.props = it.nodeValue.split(",") }
+        attributes.getNamedItem("properties")?.let{ index.properties = it.nodeValue.split(",") }
 
         return index
     }
