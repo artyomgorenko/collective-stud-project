@@ -3,8 +3,8 @@ package parser
 import com.sun.xml.internal.txw2.output.IndentingXMLStreamWriter
 import models.*
 import org.w3c.dom.Document
-import javax.xml.stream.XMLOutputFactory
 import java.io.ByteArrayOutputStream
+import javax.xml.stream.XMLOutputFactory
 
 class XdbConstructor {
     object Main {
@@ -25,10 +25,10 @@ class XdbConstructor {
 
         writer.writeStartDocument()
         writer.writeStartElement("dbd_schema")
-        writer.writeAttribute("fulltext_engine", schema.fulltest_engine)
-        writer.writeAttribute("version", schema.version)
-        writer.writeAttribute("name", schema.name)
-        writer.writeAttribute("description", schema.description)
+        writeAttribute("fulltext_engine", schema.fulltest_engine, writer)
+        writeAttribute("version", schema.version, writer)
+        writeAttribute("name", schema.name, writer)
+        writeAttribute("description", schema.description, writer)
 
         writeDomains(schema.domains, writer)
         writeTables(schema.tables, writer)
@@ -48,11 +48,11 @@ class XdbConstructor {
 
     private fun writeDomain(domain: Domain, writer: IndentingXMLStreamWriter) {
         writer.writeStartElement("domain")
-        writer.writeAttribute("name", domain.name)
-        writer.writeAttribute("type", domain.type)
-        writer.writeAttribute("align", domain.align)
-        writer.writeAttribute("width", domain.width.toString())
-        writer.writeAttribute("description", domain.description)
+        writeAttribute("name", domain.name, writer)
+        writeAttribute("type", domain.type, writer)
+        writeAttribute("align", domain.align, writer)
+        writeAttribute("width", domain.width.toString(), writer)
+        writeAttribute("description", domain.description, writer)
         writer.writeEndElement()
     }
 
@@ -64,11 +64,11 @@ class XdbConstructor {
 
     private fun writeTable(table: Table, writer: IndentingXMLStreamWriter) {
         writer.writeStartElement("table")
-        writer.writeAttribute("name", table.name)
-        writer.writeAttribute("description", table.description)
-        writer.writeAttribute("props", "table.properties")
-        writer.writeAttribute("ht_table_flags", "rws")// TODO: Replace with real value
-        writer.writeAttribute("access_level", table.accessLevel.toString())
+        writeAttribute("name", table.name, writer)
+        writeAttribute("description", table.description, writer)
+        writeAttribute("props", "table.properties", writer)
+        writeAttribute("ht_table_flags", "rws", writer)// TODO: Replace with real value
+        writeAttribute("access_level", table.accessLevel.toString(), writer)
 
 
         writeFields(table.fields, writer)
@@ -79,26 +79,67 @@ class XdbConstructor {
     }
 
     private fun writeFields(fields: List<Field>, writer: IndentingXMLStreamWriter) {
-
+        fields.forEach { writeField(it, writer) }
     }
 
     private fun writeField(field: Field, writer: IndentingXMLStreamWriter) {
+        writer.writeStartElement("field")
+        writeAttribute("name", field.name, writer)
+        writeAttribute("rname", field.rname, writer)
+        writeAttribute("domain", field.domain, writer)
+        writeAttribute("description", field.description, writer)
 
+        var properties: String = constractProperties(field.properties)
+        writeAttribute("properties", properties, writer)
+
+        writer.writeEndElement()
     }
 
     private fun writeConstaraints(constraints: List<Constraint>, writer: IndentingXMLStreamWriter) {
+        constraints.forEach { writeConstaraint(it, writer) }
 
     }
 
     private fun writeConstaraint(constraint: Constraint, writer: IndentingXMLStreamWriter) {
+        writer.writeStartElement("constraint")
+        writeAttribute("kind", constraint.kind, writer)
+        writeAttribute("items", constraint.items, writer)
+        writeAttribute("reference", constraint.reference, writer)
 
+        var properties: String = constractProperties(constraint.properties)
+        writeAttribute("properties", properties, writer)
+
+        writer.writeEndElement()
     }
 
     private fun writeIndexes(indexes: List<Index>, writer: IndentingXMLStreamWriter) {
-
+        indexes.forEach { writeIndex(it, writer) }
     }
 
     private fun writeIndex(index: Index, writer: IndentingXMLStreamWriter) {
+        writer.writeStartElement("index")
+        writeAttribute("field", index.field, writer)
 
+        var properties: String = constractProperties(index.properties)
+        writeAttribute("properties", properties, writer)
+
+        writer.writeEndElement()
+    }
+
+    private fun writeAttribute(name: String, attributeValue: String, writer: IndentingXMLStreamWriter) {
+        if (!attributeValue.isEmpty()) {
+            writer.writeAttribute(name, attributeValue)
+        }
+    }
+
+    private fun constractProperties(properties: List<String>): String {
+        var propertiesStr: String = ""
+        for (i in 0 until properties.size) {
+            propertiesStr += properties[i]
+            if (i < properties.size - 1) {
+                propertiesStr += ","
+            }
+        }
+        return propertiesStr
     }
 }
