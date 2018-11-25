@@ -78,7 +78,7 @@ class XdbParser {
             attributes.getNamedItem("description")?.let { table.description = it.nodeValue }
             attributes.getNamedItem("ht_table_flags")?.let { table.ht_table_flags = false }
             attributes.getNamedItem("accessLevel")?.let { table.accessLevel = Integer.parseInt(it.nodeValue) }
-            attributes.getNamedItem("properties")?.let { table.properties = it.nodeValue.split(",") }
+            attributes.getNamedItem("props")?.let { table.properties = it.nodeValue.split(",") }
 
             // add child tags
             val fields: ArrayList<Field> = ArrayList()
@@ -122,7 +122,7 @@ class XdbParser {
         attributes.getNamedItem("align")?.let { domain.align = it.nodeValue }
         attributes.getNamedItem("width")?.let { domain.width = Integer.parseInt(it.nodeValue) }
         attributes.getNamedItem("charLength")?.let { domain.charLength = Integer.parseInt(it.nodeValue)}
-        attributes.getNamedItem("properties")?.let { domain.properties = it.nodeValue.split(",") }
+        attributes.getNamedItem("props")?.let { domain.properties = it.nodeValue.split(",") }
 
         return domain
     }
@@ -134,7 +134,7 @@ class XdbParser {
         attributes.getNamedItem("kind")?.let{ constraint.kind = it.nodeValue }
         attributes.getNamedItem("items")?.let{ constraint.items = it.nodeValue }
         attributes.getNamedItem("reference")?.let{ constraint.reference = it.nodeValue }
-        attributes.getNamedItem("properties")?.let{ constraint.properties = it.nodeValue.split(",") }
+        attributes.getNamedItem("props")?.let{ constraint.properties = it.nodeValue.split(",") }
 
         return constraint
     }
@@ -146,7 +146,8 @@ class XdbParser {
         attributes.getNamedItem("name")?.let{ field.name = it.nodeValue }
         attributes.getNamedItem("rname")?.let{ field.rname = it.nodeValue }
         attributes.getNamedItem("domain")?.let{ field.domain = it.nodeValue }
-        attributes.getNamedItem("properties")?.let{ field.properties = it.nodeValue.split(",") }
+        attributes.getNamedItem("description")?.let{ field.description = it.nodeValue }
+        attributes.getNamedItem("props")?.let{ field.properties = it.nodeValue.split(",") }
 
         return field
     }
@@ -156,7 +157,7 @@ class XdbParser {
         val attributes: NamedNodeMap = node.attributes
 
         attributes.getNamedItem("field")?.let{ index.field = it.nodeValue }
-        attributes.getNamedItem("properties")?.let{ index.properties = it.nodeValue.split(",") }
+        attributes.getNamedItem("props")?.let{ index.properties = it.nodeValue.split(",") }
 
         return index
     }
