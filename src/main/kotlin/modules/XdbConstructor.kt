@@ -1,4 +1,4 @@
-package parser
+package modules
 
 import com.sun.xml.internal.txw2.output.IndentingXMLStreamWriter
 import models.*

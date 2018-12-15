@@ -1,4 +1,4 @@
-package parser
+package modules
 
 import models.*
 import org.w3c.dom.*
