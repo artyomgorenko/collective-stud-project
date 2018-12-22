@@ -10,9 +10,9 @@
         <domain name="ID_descr" type="LARGEINT" align="L" width="11"/>
         <domain name="Layout_id" type="STRING" align="L" width="200" props="case_sensitive" char_length="200"/>
         <domain name="N" description="Номер" type="LARGEINT" align="L" width="8"/>
-        <domain name="N Исходящ" type="STRING" align="L" width="20" char_length="20"/>
-        <domain name="N письма" type="STRING" align="L" width="20" char_length="20"/>
-        <domain name="N счета" type="STRING" align="L" width="6" char_length="6"/>
+        <domain name="N_Исходящ" type="STRING" align="L" width="20" char_length="20"/>
+        <domain name="N_письма" type="STRING" align="L" width="20" char_length="20"/>
+        <domain name="N_счета" type="STRING" align="L" width="6" char_length="6"/>
         <domain name="N_Рексофт" type="STRING" align="L" width="10" char_length="10"/>
         <domain name="TextData" type="MEMO" align="L"/>
         <domain name="id_ACC" description="Первичный ключ таблицы ACCOUNT" type="LARGEINT" align="L" width="11"/>
@@ -277,7 +277,7 @@
         <table name="ACCOUNT" description="Счета" props="add, edit" ht_table_flags="rws" access_level="0">
             <field name="id_ACC" rname="id_ACC" domain="id_ACC" props="autocalculated"/>
             <field name="KodDogovor" rname="КодДоговор" domain="КодДоговор" props="input, edit, show_in_details"/>
-            <field name="N_scheta" rname="N счета" domain="N счета" props="input, edit, show_in_grid, show_in_details, required"/>
+            <field name="N_scheta" rname="N_счета" domain="N_счета" props="input, edit, show_in_grid, show_in_details, required"/>
             <field name="DataScheta" rname="ДатаСчета" domain="Дата" props="input, edit, show_in_grid, show_in_details, required"/>
             <field name="Summa" rname="Сумма" domain="Сумма" props="input, edit, show_in_grid, show_in_details"/>
             <field name="DataOplaty" rname="ДатаОплаты" domain="ДатаОплаты" props="input, edit, show_in_details"/>
@@ -579,7 +579,7 @@
         <table name="CORR_IN" description="Входящие официальные письма" props="add, edit, delete" ht_table_flags="rws" access_level="100">
             <field name="KodPismVx" rname="КодПисьмВх" domain="КодПисьмВх" props="show_in_details, autocalculated"/>
             <field name="KodRabKont" rname="КодРабКонт" domain="КодРабКонт" props="show_in_details"/>
-            <field name="N_pisma" rname="N письма" domain="N письма" props="input, edit, show_in_grid, show_in_details, is_mean"/>
+            <field name="N_pisma" rname="N_письма" domain="N_письма" props="input, edit, show_in_grid, show_in_details, is_mean"/>
             <field name="Data" rname="Дата" domain="Дата" props="input, edit, show_in_grid, show_in_details, is_mean, required"/>
             <field name="KodKlienta" rname="КодКлиента" domain="КодКлиента" description="Организация" props="input, edit, show_in_details, is_mean"/>
             <field name="Komu" rname="Кому" domain="КодМастера" description="Кому адресовано" props="input, edit, show_in_grid, show_in_details, required"/>
@@ -617,7 +617,7 @@
         <table name="CORR_OUT" description="Исходящие официальные письма" props="add, edit, delete" ht_table_flags="rws" access_level="100">
             <field name="KodPismIs" rname="КодПисьмИс" domain="КодПисьмИс" props="show_in_grid, show_in_details, autocalculated"/>
             <field name="KodRabKont" rname="КодРабКонт" domain="КодРабКонт" props="show_in_details"/>
-            <field name="N_pisma" rname="N письма" domain="N Исходящ" props="input, edit, show_in_grid, show_in_details, is_mean"/>
+            <field name="N_pisma" rname="N_письма" domain="N_Исходящ" props="input, edit, show_in_grid, show_in_details, is_mean"/>
             <field name="Data" rname="Дата" domain="Дата" props="input, edit, show_in_grid, show_in_details, is_mean, required"/>
             <field name="KodKlienta" rname="КодКлиента" domain="КодКлиента" description="Организация" props="input, edit, show_in_details, is_mean"/>
             <field name="KodSotrudn" rname="КодСотрудн" domain="КодСотрудн" description="Кому адресовано" props="input, edit, show_in_grid, show_in_details, required"/>
@@ -1230,7 +1230,7 @@
         </table>
         <table name="REG_KOUT" description="Журнал регистр.исходящих писем" props="add, edit, delete" ht_table_flags="rws" access_level="100">
             <field name="KodZHurnIsx" rname="КодЖурнИсх" domain="КодЖурнИсх" props="show_in_grid, show_in_details, autocalculated"/>
-            <field name="Isxodyashhij" rname="Исходящий" domain="N Исходящ" description="Исходящий номер" props="input, edit, show_in_grid, show_in_details, required"/>
+            <field name="Isxodyashhij" rname="Исходящий" domain="N_Исходящ" description="Исходящий номер" props="input, edit, show_in_grid, show_in_details, required"/>
             <field name="Data" rname="Дата" domain="Дата" props="input, edit, show_in_grid, show_in_details, required"/>
             <field name="Pismo" rname="Письмо" domain="КодПисьмИс" props="input, edit, show_in_grid, show_in_details, required"/>
             <field name="Primechanie" rname="Примечание" domain="Примечание" props="input, edit, show_in_details"/>
