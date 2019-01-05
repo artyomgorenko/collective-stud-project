@@ -22,125 +22,87 @@ class SchemaConstructor {
         }
     }
 
+    val CONNECTION_URL = ""
+
     fun createSchema(schema : Schema) {
-        val connection: Connection = connect() ?: return
+        val connection: Connection = Utils.connect(CONNECTION_URL) ?: return
+        connection.autoCommit = false
+        val ddl : String = createSchemaDDL(schema)
+
         connection.use {
             try {
-                connection.autoCommit = false
-                createSchema(schema, connection)
+                val statement : Statement = connection.createStatement()
+                statement.use {
+                    println(ddl)
+                    statement.executeUpdate(ddl)
+                }
                 connection.commit()
             }  catch (e: SQLException) {
                 connection.rollback()
-                println(e.printStackTrace())
+                e.printStackTrace()
             }
         }
     }
 
-    fun createSchema(schema : Schema, connection : Connection) {
-        createDomains(schema.domains, connection)
-        createTables(schema.tables, connection)
-    }
-
-    private fun createDomains(domains: List<Domain>, connection: Connection) {
-        domains.forEach { domain ->
-            createDomain(domain, connection)
-        }
-    }
-
-    private fun createDomain(domain: Domain, connection: Connection) {
+    fun createSchemaDDL(schema: Schema): String {
         val sb : StringBuilder = StringBuilder()
+        createDomains(schema.domains, sb)
+        createTables(schema.tables, sb)
+        return sb.toString()
+    }
 
-        var postgresType: String = ""
-        when {
-            domain.type.equals("BLOB") -> {
-                postgresType = "BYTEA"
-            }
-            domain.type.equals("STRING") -> {
-                postgresType = "VARCHAR"
-            }
-            domain.type.equals("LARGEINT") -> {
-                postgresType = "NUMERIC"
-            }
-            domain.type.equals("WORD") -> {
-                postgresType = "NUMERIC"
-            }
-            domain.type.equals("MEMO") -> {
-                postgresType = "VARCHAR"
-            }
-            domain.type.equals("DATE") -> {
-                postgresType = "TIMESTAMP"
-            }
-            domain.type.equals("BYTE") -> {
-                postgresType = "SMALLINT"
-            }
-            else -> {
-                postgresType = domain.type
-            }
+    private fun createDomains(domains: List<Domain>, sb : StringBuilder) {
+        domains.forEach { domain ->
+            createDomain(domain, sb)
         }
+    }
+
+    private fun createDomain(domain: Domain, sb : StringBuilder) {
+        var postgresType: String = convertToPostgresType(domain.type)
 
         if (!postgresType.equals("BOOLEAN") && !postgresType.equals("BYTE") && !postgresType.equals("SMALLINT")) {
             if (domain.width != 0) postgresType += "(${domain.width})"
         }
         sb.append("CREATE DOMAIN ${domain.name} AS $postgresType;\n")
-
-        val statement : Statement = connection.createStatement()
-        statement.use {
-            println("DOMAIN:" + sb.toString())
-            statement.executeUpdate(sb.toString())
-        }
     }
 
-    private fun createTables(tables: List<Table>, connection: Connection) {
+    private fun createTables(tables: List<Table>, sb: StringBuilder) {
         tables.forEach { table ->
           try {
-              createTable(table, connection)
+              createTable(table, sb)
           } catch (e : SQLException) {
               println(e.message)
           }
         }
         tables.forEach { table ->
             try {
-                createTableDetails(table, connection)
+                createTableDetails(table, sb)
             } catch (e : SQLException) {
                 println(e.message)
             }
         }
     }
 
-    private fun createTable(table: Table, connection: Connection) {
-        val sb:StringBuilder = StringBuilder()
-
+    private fun createTable(table: Table, sb: StringBuilder) {
         sb.append("CREATE TABLE IF NOT EXISTS ${table.name} (\n")
         for (i in 0 until table.fields.size - 1) {
-            sb.append("${table.fields[i].name} ${table.fields[i].domain}, \n")
+            sb.append("${table.fields[i].name} ${convertToPostgresType(table.fields[i].domain)}, \n")
         }
-        sb.append("${table.fields[table.fields.size - 1].name} ${table.fields[table.fields.size - 1].domain}\n")
+        sb.append("${table.fields[table.fields.size - 1].name} ${convertToPostgresType(table.fields[table.fields.size - 1].domain)}\n")
         sb.append(");\n")
 
         sb.append(createCommentOnTableSql(table))
         table.fields.forEach { field ->
             sb.append(createCommentOnTableSql(table, field))
         }
-
-        val statement : Statement = connection.createStatement()
-        statement.use {
-            println(sb.toString())
-            statement.executeUpdate(sb.toString())
-        }
     }
 
-    private fun createTableDetails(table: Table, connection: Connection) {
-        val sb:StringBuilder = StringBuilder()
+    private fun createTableDetails(table: Table, sb: StringBuilder) {
         table.constraints.forEach { constraint ->
             sb.append(createConstraintSql(constraint, table.name))
         }
         table.indexes.forEach { index ->
             sb.append(createIndexSql(index, table.name))
-        }
-        val statement : Statement = connection.createStatement()
-        statement.use {
-            println(sb.toString())
-            statement.executeUpdate(sb.toString())
         }
     }
 
@@ -169,15 +131,34 @@ class SchemaConstructor {
         return "COMMENT ON TABLE ${table.name} IS '${table.description}';\n"
     }
 
-    private fun connect() : Connection? {
-        var connection: Connection? = null
-        try {
-            val url = "jdbc:postgresql://localhost:5432/postgres?user=admin&password=admin"
-            connection = DriverManager.getConnection(url)
-        } catch (e: SQLException) {
-            println(e.message)
+    private fun convertToPostgresType(type: String): String {
+        val postgresType: String
+        when {
+            type.equals("BLOB") -> {
+                postgresType = "BYTEA"
+            }
+            type.equals("STRING") -> {
+                postgresType = "VARCHAR"
+            }
+            type.equals("LARGEINT") -> {
+                postgresType = "NUMERIC"
+            }
+            type.equals("WORD") -> {
+                postgresType = "NUMERIC"
+            }
+            type.equals("MEMO") -> {
+                postgresType = "VARCHAR"
+            }
+            type.equals("DATE") -> {
+                postgresType = "TIMESTAMP"
+            }
+            type.equals("BYTE") -> {
+                postgresType = "SMALLINT"
+            }
+            else -> {
+                postgresType = type
+            }
         }
-
-        return connection
+        return postgresType
     }
 }
