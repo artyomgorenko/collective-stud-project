@@ -1,4 +1,4 @@
-package parser
+package modules
 
 import models.*
 import org.w3c.dom.*
@@ -116,7 +116,7 @@ class XdbParser {
         val domain: Domain = Domain()
         val attributes: NamedNodeMap = node.attributes
 
-        attributes.getNamedItem("name")?.let  { domain.name = it.nodeValue }
+        attributes.getNamedItem("name")?.let  { domain.name = it.nodeValue.replace(("[-.\\\\/]".toRegex()), "").replace("[\\s]".toRegex(), "_") }
         attributes.getNamedItem("description")?.let  { domain.description = it.nodeValue }
         attributes.getNamedItem("type")?.let { domain.type = it.nodeValue }
         attributes.getNamedItem("align")?.let { domain.align = it.nodeValue }
@@ -145,7 +145,7 @@ class XdbParser {
 
         attributes.getNamedItem("name")?.let{ field.name = it.nodeValue }
         attributes.getNamedItem("rname")?.let{ field.rname = it.nodeValue }
-        attributes.getNamedItem("domain")?.let{ field.domain = it.nodeValue }
+        attributes.getNamedItem("domain")?.let{ field.domain = it.nodeValue.replace(("[-.\\\\/]".toRegex()), "").replace("[\\s]".toRegex(), "_") }
         attributes.getNamedItem("description")?.let{ field.description = it.nodeValue }
         attributes.getNamedItem("props")?.let{ field.properties = it.nodeValue.split(",") }
 
