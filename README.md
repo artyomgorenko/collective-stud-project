@@ -18,5 +18,7 @@
   - `XdbConstructor.kt` - модуль, для создания XDB на основе RAM (RAM -> XDB)
   - `DbdConstructor.kt` - модуль, для создания DBD (RAM -> DBD)
   - `MetaDataParser.kt` - модуль, для создания RAM-представления на основе метаданных из MSSQL (MSSQL -> RAM)
+  - `DataTransferHelper.kt` - модуль, для переноса данных из MSSQL в PostgreSQL (MSSQL -> PostgreSQL)
   - `SchemaConstructor.kt` - модуль, для генерации DDL целевой БД PostgreSQL на основе RAM-представления (RAM -> PostgreSQL)
   - `Utils.kt` - утилиты приложения
+ 
