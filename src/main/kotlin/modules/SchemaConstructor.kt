@@ -134,10 +134,14 @@ class SchemaConstructor {
     private fun convertToPostgresType(type: String): String {
         val postgresType: String
         when {
-            type.equals("BLOB") -> {
+            type.equals("BLOB")
+                    || type.equals("image") -> {
                 postgresType = "BYTEA"
             }
-            type.equals("STRING") -> {
+            type.equals("STRING")
+                    || type.toUpperCase().equals("NCHAR")
+                    || type.toUpperCase().equals("NVARCHAR")
+                    || type.toUpperCase().equals("NTEXT") -> {
                 postgresType = "VARCHAR"
             }
             type.equals("LARGEINT") -> {
@@ -149,11 +153,15 @@ class SchemaConstructor {
             type.equals("MEMO") -> {
                 postgresType = "VARCHAR"
             }
-            type.equals("DATE") -> {
+            type.equals("DATE")
+                    || type.toUpperCase().equals("DATETIME") -> {
                 postgresType = "TIMESTAMP"
             }
             type.equals("BYTE") -> {
                 postgresType = "SMALLINT"
+            }
+            type.equals("bit") -> {
+                postgresType = "boolean"
             }
             else -> {
                 postgresType = type
