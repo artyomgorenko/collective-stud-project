@@ -61,9 +61,10 @@ class DbdConstructor {
         , thousands_separator
         , summable
         , case_sensitive
+        , unnamed
         , uuid
         , data_type_id)
-        values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, (SELECT id FROM ${Tables.DATA_TYPES.tableName} WHERE type_id = ?))
+        values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, (SELECT id FROM ${Tables.DATA_TYPES.tableName} WHERE type_id = ?))
     """.trimIndent()
 
     @JvmField val INSERT_FIELD = """
@@ -175,10 +176,10 @@ class DbdConstructor {
     }
 
     private fun insertDomains(domains: List<Domain>, connection: Connection) {
-        domains.forEach { insertDomain(it, connection) }
+        domains.forEach { insertDomain(it, connection, false) }
     }
 
-    private fun insertDomain(domain: Domain, connection: Connection) {
+    private fun insertDomain(domain: Domain, connection: Connection, isUnnamed: Boolean) {
         val statement: PreparedStatement = connection.prepareStatement(INSERT_DOMAIN)
         statement.use {
             statement.setString(1, domain.name)
@@ -192,8 +193,9 @@ class DbdConstructor {
             statement.setBoolean(11, domain.properties.find { property -> property == "thousands_separator" } != null)
             statement.setBoolean(12, domain.properties.find { property -> property == "summable boolean" } != null)
             statement.setBoolean(13, domain.properties.find { property -> property == "case_sensitive" } != null)
-            statement.setString(14, UUID.randomUUID().toString())
-            statement.setString(15, domain.type)
+            statement.setBoolean(14, isUnnamed)
+            statement.setString(15, UUID.randomUUID().toString())
+            statement.setString(16, domain.type)
             statement.execute()
         }
     }
@@ -231,7 +233,14 @@ class DbdConstructor {
             statement.setString(3, field.name)
             statement.setString(4, field.rname)
             statement.setString(5, field.description)
-            statement.setString(6, field.domain)
+            val domain = field.domain
+            if (domain is String) {
+                statement.setString(6, domain)
+            } else if (domain is Domain) {
+                insertDomain(domain, connection, true)
+                statement.setString(6, domain.name)
+            }
+
             statement.setBoolean(7, field.properties.find { property -> property == "can_input" } != null)
             statement.setBoolean(8, field.properties.find { property -> property == "can_edit" } != null)
             statement.setBoolean(9, field.properties.find { property -> property == "show_in_grid" } != null)
