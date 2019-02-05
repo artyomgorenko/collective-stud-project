@@ -38,6 +38,7 @@ class DbDescription {
             thousands_separator boolean default(null),          -- нужен ли разделитель тысяч?
             summable boolean default(null),                     -- признак того, что поле является суммируемым
             case_sensitive boolean default(null),               -- признак необходимости регистронезависимого поиска для поля
+            unnamed boolean default(null),                      -- именованный/неименованный домен
             uuid varchar unique not null COLLATE NOCASE         -- уникальный идентификатор домена
         );
 

@@ -86,10 +86,20 @@ class XdbConstructor {
         writer.writeStartElement("field")
         writeAttribute("name", field.name, writer)
         writeAttribute("rname", field.rname, writer)
-        writeAttribute("domain", field.domain, writer)
         writeAttribute("description", field.description, writer)
 
-        var properties: String = constractProperties(field.properties)
+        val domain = field.domain
+        if (domain is String) {
+            writeAttribute("domain", domain, writer)
+        } else if (domain is Domain) {
+            writeAttribute("domain_name", domain.name, writer)
+            writeAttribute("type", domain.type, writer)
+            writeAttribute("align", domain.align, writer)
+            writeAttribute("width", domain.width.toString(), writer)
+            writeAttribute("description", domain.description, writer)
+        }
+
+        val properties: String = constractProperties(field.properties)
         writeAttribute("properties", properties, writer)
 
         writer.writeEndElement()
