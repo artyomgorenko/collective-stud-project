@@ -131,8 +131,16 @@ class SchemaConstructor {
         return "COMMENT ON TABLE ${table.name} IS '${table.description}';\n"
     }
 
-    private fun convertToPostgresType(type: String): String {
+    private fun convertToPostgresType(value: Any): String {
         val postgresType: String
+        var type: String = ""
+
+        if (value is String) {
+            type = value
+        } else if (value is Domain) {
+            type = value.type
+        }
+
         when {
             type.equals("BLOB")
                     || type.equals("image") -> {
@@ -167,6 +175,7 @@ class SchemaConstructor {
                 postgresType = type
             }
         }
+
         return postgresType
     }
 }

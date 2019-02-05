@@ -89,7 +89,7 @@ class XdbParser {
                 val node: Node = tableNode.childNodes.item(i)
                 when {
                     node.nodeName.equals("field") -> {
-                        fields.add(parseField(node))
+                        fields.add(parseField(node, table.name))
                     }
                     node.nodeName.equals("constraint") -> {
                         constraints.add(parseConstraint(node))
@@ -139,15 +139,29 @@ class XdbParser {
         return constraint
     }
 
-    private fun parseField(node: Node): Field {
+    private fun parseField(node: Node, tableName: String): Field {
         val field: Field = Field()
         val attributes: NamedNodeMap = node.attributes
+        val domain: Domain = Domain()
+        var domainName: String = String()
 
         attributes.getNamedItem("name")?.let{ field.name = it.nodeValue }
         attributes.getNamedItem("rname")?.let{ field.rname = it.nodeValue }
-        attributes.getNamedItem("domain")?.let{ field.domain = it.nodeValue.replace(("[-.\\\\/]".toRegex()), "").replace("[\\s]".toRegex(), "_") }
         attributes.getNamedItem("description")?.let{ field.description = it.nodeValue }
         attributes.getNamedItem("props")?.let{ field.properties = it.nodeValue.split(",") }
+        attributes.getNamedItem("domain")?.let{ domainName = it.nodeValue.replace(("[-.\\\\/]".toRegex()), "").replace("[\\s]".toRegex(), "_") }
+
+        attributes.getNamedItem("type")?.let { domain.type = it.nodeValue }
+        attributes.getNamedItem("align")?.let { domain.align = it.nodeValue }
+        attributes.getNamedItem("width")?.let { domain.width = Integer.parseInt(it.nodeValue) }
+        attributes.getNamedItem("charLength")?.let { domain.charLength = Integer.parseInt(it.nodeValue)}
+
+        if (domainName.isNotEmpty()) {
+            field.domain = domainName
+        } else {
+            domain.name = "${tableName}_${field.name}"
+            field.domain = domain
+        }
 
         return field
     }

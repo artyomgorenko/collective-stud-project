@@ -67,25 +67,29 @@ class DbdParser {
         , summable
         , case_sensitive
         , data_type_id
+        , unnamed
         FROM ${Tables.DOMAINS.tableName}
     """.trimIndent()
 
     @JvmField val SELECT_FIELD = """
         SELECT
-          table_id
-        , position
-        , name
-        , russian_short_name
-        , description
-        , domain_id
-        , can_input
-        , can_edit
-        , show_in_grid
-        , show_in_details
-        , is_mean
-        , autocalculated
-        , required
-        FROM ${Tables.FIELDS.tableName}
+          f.table_id
+        , f.position
+        , f.name
+        , f.russian_short_name
+        , f.description
+        , f.domain_id
+        , f.can_input
+        , f.can_edit
+        , f.show_in_grid
+        , f.show_in_details
+        , f.is_mean
+        , f.autocalculated
+        , f.required
+        , t.name
+        , t.unnamed
+        FROM ${Tables.FIELDS.tableName} f
+        INNER JOIN ${Tables.DOMAINS.tableName} t on f.domain_id = t.id
         where table_id = ?
     """.trimIndent()
 
@@ -168,7 +172,7 @@ class DbdParser {
         var domains: ArrayList<Domain> = arrayListOf()
         for (i in 0 until 10)
         {
-            domains.add(getDomain(connection))
+            getDomain(connection)?.let { domain -> domains.add(domain) }
         }
         return domains
     }
@@ -269,12 +273,15 @@ class DbdParser {
 //        FROM ${Tables.DOMAINS.tableName}
 //    """.trimIndent()
 
-    private fun getDomain(connection : Connection) : Domain {
+    private fun getDomain(connection : Connection) : Domain? {
         val domain : Domain = Domain()
 
         val statement: PreparedStatement = connection.prepareStatement(SELECT_DOMAIN)
         val rs : ResultSet = statement.executeQuery()
         while (rs.next()) {
+            if (!rs.getBoolean("unnamed")) {
+                return null
+            }
             domain.name = rs.getString("name")
             domain.description = rs.getString("description")
             domain.type = rs.getString("data_type_id")
@@ -312,7 +319,14 @@ class DbdParser {
         while (rs.next()) {
             field.name = rs.getString("name")
             field.rname = rs.getString("russian_short_name")
-            field.domain = rs.getString("domain_id")
+
+            if (rs.getBoolean("unnamed")) {
+                val domain: Domain = getDomain(connection)!!
+                field.domain = domain
+            } else {
+                field.domain = rs.getString("domain_id")
+            }
+
             field.description = rs.getString("description")
             var properties: ArrayList<String> = arrayListOf()
             properties.add(rs.getString("can_input"))
