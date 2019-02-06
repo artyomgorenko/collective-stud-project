@@ -2,6 +2,7 @@ package modules
 
 import models.Schema
 import java.sql.*
+import java.util.concurrent.TimeUnit
 
 class DataTransferHelper {
     object Main {
@@ -17,14 +18,13 @@ class DataTransferHelper {
         }
     }
 
-    private val CONNECTION_URL_MSSQL = ""
-    private val CONNECTION_URL_POSTGRES = ""
+    private val CONNECTION_URL_MSSQL = "jdbc:sqlserver://localhost:1433;database=Northwind;username=SA;password=Фф2429989"
+    private val CONNECTION_URL_POSTGRES = "jdbc:postgresql://localhost:5432/postgres?user=akbar&password=Aa2429989"
     private val BATCH_SIZE_LIMIT = 1000
 
     fun transferData(schema: Schema) {
         val connection: Connection = Utils.connect(CONNECTION_URL_MSSQL)!!
         val connection2: Connection = Utils.connect(CONNECTION_URL_POSTGRES)!!
-        connection.autoCommit = false
 
         try {
             disableConstraints()
@@ -50,6 +50,7 @@ class DataTransferHelper {
                                 if (values.isNotEmpty()) {
                                     if (rowsInserted >= BATCH_SIZE_LIMIT) {
                                         insertStatement.executeBatch()
+                                        connection2.commit()
                                         rowsInserted = 0
                                     }
                                     val insert = prepareInsert(table.name, fields, values)
@@ -60,6 +61,7 @@ class DataTransferHelper {
                             }
                             if (rowsInserted > 0) {
                                 insertStatement.executeBatch()
+                                connection2.commit()
                             }
                         }
                     }
@@ -67,7 +69,6 @@ class DataTransferHelper {
             }
         } catch (e : SQLException) {
             e.printStackTrace()
-            connection.rollback()
         } finally {
             enableConstraints()
         }
